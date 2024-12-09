@@ -14,8 +14,11 @@ if it starts with `&&` it parses it as encrypted text
 
 if it starts with `@@` it makes it the new password
 
+random-password creates a random new password that starts with `@@` and can be run
+
 if it starts with neither, it prompts the user for text to encrypt
 
 support is best on linux, but windows sorta works (thanks novato)
 
-theres also some stuff for using pgp keys for sharing passwords between people securel
+theres also some stuff for using pgp keys for sharing passwords between people securely but just use kleopatra lmao
+
