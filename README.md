@@ -17,8 +17,12 @@ if it starts with `@@` it makes it the new password
 
 if it starts with neither, it prompts the user for text to encrypt
 
-random-password creates a random new password that starts with `@@` and can be run
+flags: 
 
-support is best on linux, ~~but windows sorta works~~ windows support too hard to maintain
+`-p`: create new password, overwrite current saved password with it, and copy the new one to the clipboard
 
-for sharing passwords between people securely just use kleopatra and pgp keys lmao
+`-n`: manually type in a new password
+
+support is only for linux with x11 or wayland
+
+for sharing passwords between people securely just use pgp keys
