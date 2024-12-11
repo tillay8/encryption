@@ -1,6 +1,11 @@
 from hashlib import sha256
-from Crypto.Cipher import AES # Please make sure the pycryptodome package is installed
-from Crypto.Util.Padding import pad, unpad
+import os, base64, subprocess, sys, random, string #  Please be on a linux system and have wl-copy and xclip installed
+try:
+    from Crypto.Cipher import AES # Please make sure the python-pycryptodome package is installed
+    from Crypto.Util.Padding import pad, unpad
+except ModuleNotFoundError: # Check if pycryptodome is installed
+    print("Please install python-pycryptodome")
+    sys.exit(1) # Exit with an error
 import os, base64, subprocess, sys, random, string #  Please be on a linux system and have wl-copy and xclip installed
 key_file_path = "/tmp/key" # This is designed to store in the ram on a linux system. This path can be changed.
 def copy_to_clipboard(text): # This copies text to the clipboard for the specific desktop environment
