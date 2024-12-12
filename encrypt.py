@@ -19,7 +19,11 @@ if (len(sys.argv) > 1): # This checks for a flag
         with open(key_file_path, 'w') as key_file: key_file.write(password) # Overwrite the filepath with the new password
         print(f"New password saved to {key_file_path} and copied to clipboard.")
         sys.exit(0) # Finish script and indicate success
-clipboard_content = subprocess.getoutput("wl-paste" if os.environ.get("XDG_SESSION_TYPE") == "wayland" else "xclip -o -selection clipboard")
+try:
+    clipboard_content = subprocess.getoutput("wl-paste" if os.environ.get("XDG_SESSION_TYPE") == "wayland" else "xclip -o -selection clipboard")
+except UnicodeDecodeError: # Check if clipboard content is freaky
+    print("what is on your clipboard bro??")
+    sys.exit(1) # Be polite and end the program
 def password_logic(): # Above line sets a varaible to the text on the clipboard before running the script
     if clipboard_content.startswith("@@"): # This checks if the text on the clipboard starts with "@@"
         with open(key_file_path, 'w') as key_file: key_file.write(clipboard_content)
@@ -43,7 +47,7 @@ def decrypt(ciphertext, passphrase): # This attempts to decrypt the text accordi
         return None
 def process_clipboard_content(content, password, copy=False):
     if "&&" in content: # This detects if the text on the clipboard is encrypted and knows to decrypt it
-        content = re.sub(r"@[^&]*(?=&&)|@.*$", "", content).replace(" ", "") # Remove if u triple clicked with included ping (i hate regex)
+        content = re.sub(r"@[^&]*(?=&&)|@.*$", "", content).replace(" ", "") # Remove if u triple clicked with included ping
         content = re.sub(r"<.*?>", "", content) # Remove pings if u used built in copy button
         print("Decrypted text:", decrypt(content[2:], password) or "Incorrect password.")
         if copy: copy_to_clipboard("")
