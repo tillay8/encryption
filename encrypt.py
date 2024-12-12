@@ -1,5 +1,5 @@
 from hashlib import sha256
-import os, base64, subprocess, sys, random, string #  Please be on a linux system and have wl-copy and xclip installed
+import os, base64, subprocess, sys, random, string, re #  Please be on a linux system and have wl-copy and xclip installed
 try:
     from Crypto.Cipher import AES # Please make sure the python-pycryptodome package is installed
     from Crypto.Util.Padding import pad, unpad
@@ -42,7 +42,9 @@ def decrypt(ciphertext, passphrase): # This attempts to decrypt the text accordi
     except (ValueError, KeyError): # This detects if it is unable to decrypt the code with the password
         return None
 def process_clipboard_content(content, password, copy=False):
-    if content.startswith("&&"): # This detects if the text on the clipboard is encrypted and knows to decrypt it
+    if "&&" in content: # This detects if the text on the clipboard is encrypted and knows to decrypt it
+        content = re.sub(r"@[^&]*(?=&&)|@.*$", "", content).replace(" ", "") # Remove if u triple clicked with included ping (i hate regex)
+        content = re.sub(r"<.*?>", "", content) # Remove pings if u used built in copy button
         print("Decrypted text:", decrypt(content[2:], password) or "Incorrect password.")
         if copy: copy_to_clipboard("")
     else:
