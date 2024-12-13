@@ -5,6 +5,9 @@ required dependencies:
 
 `xclip, wl-clipboard, python-pyrcyptodome`
 
+optional dependencies:
+`tk` to display dcrypted images 
+
 default location for stored password is /tmp/key, which is wiped on reboot because its in ram
 
 can be changed my modifying the source code for encrypt.py
@@ -26,6 +29,12 @@ flags:
 `-p`: create new password, overwrite current saved password with it, and copy the new one to the clipboard
 
 `-n`: manually type in a new password
+
+`-i`: automatically opens a window with decrypted image for viewing
+
+add the following line to your hyprland config to make the preview floating:
+
+`windowrule=float,title:^(Image)(.*)$`
 
 support is only for linux with x11 or wayland
 
