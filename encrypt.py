@@ -1,4 +1,4 @@
-import sys, subprocess, secrets, io, os, base64, random, string, binascii
+import sys, subprocess, secrets, io, os, base64, random, string, binascii, re
 from PIL import Image, UnidentifiedImageError
 from hashlib import sha256
 try:
@@ -13,7 +13,7 @@ except ModuleNotFoundError:
     sys.exit(1)
 # Constants
 PASSWORD_FILE = "/tmp/key"
-prefix_text, prefix_password, prefix_image = "$$", "@@", "££"
+prefix_text, prefix_password, prefix_image = "&&", "@@", "££"
 message_file_path = os.path.expanduser("~/Downloads/message.txt")
 
 # Clipboard functions
@@ -96,8 +96,11 @@ if len(sys.argv) > 1:
 clipboard_content = get_from_clipboard()
 password = password_logic()
 
-if clipboard_content.startswith(prefix_text.encode()):
-    text = decrypt(clipboard_content[len(prefix_text):].decode(), password) or "Incorrect password."
+if prefix_text.encode() in clipboard_content:
+    content = clipboard_content.decode()
+    content = re.sub(r"@[^&]*&&|@.*$", "", content).replace(" ", "")
+    content = re.sub(r"<.*?>", "", content)
+    text = decrypt(content, password) or "Incorrect password."
     print("Decrypted text:", text)
     copy_to_clipboard("")
 elif clipboard_content.startswith(prefix_image.encode()):
@@ -115,12 +118,18 @@ elif os.path.exists(message_file_path):
     with open(message_file_path, 'rb') as f:
         clipboard_content = f.read()
     if clipboard_content.startswith(prefix_image.encode()):
-        decrypted_image = decrypt_image(clipboard_content[len(prefix_image):], derive_key(password))
-        img_bytes = io.BytesIO()
-        decrypted_image.save(img_bytes, format="PNG")
-        copy_to_clipboard(img_bytes.getvalue())
-        print("Image decrypted from file and copied.")
-        display_image()
+        try:
+            decrypted_image = decrypt_image(clipboard_content[len(prefix_image):], derive_key(password))
+            img_bytes = io.BytesIO()
+            decrypted_image.save(img_bytes, format="PNG")
+            copy_to_clipboard(img_bytes.getvalue())
+            print("Image decrypted from file and copied.")
+            display_image()
+        except UnidentifiedImageError:
+            os.remove(message_file_path)
+            print("Incorrect password!")
+            sys.exit(1)
+
     os.remove(message_file_path)
 else:
     try:
