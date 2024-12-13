@@ -1,6 +1,5 @@
 import sys, subprocess, secrets, io, os, base64, random, string, binascii
-from tkinter import Tk, Label
-from PIL import Image, UnidentifiedImageError, ImageTk
+from PIL import Image, UnidentifiedImageError
 from hashlib import sha256
 try:
     from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
@@ -69,6 +68,8 @@ def decrypt_image(encrypted_data, key):
 def display_image():
     if len(sys.argv) > 1 and sys.argv[1] == "-i":
         try:
+            from tkinter import Tk, Label
+            from PIL import ImageTk
             root = Tk()
             root.title("Image")
             tk_image = ImageTk.PhotoImage(decrypted_image)
@@ -91,7 +92,6 @@ if len(sys.argv) > 1:
         with open(PASSWORD_FILE, 'w') as f: f.write(password)
         print(f"New random password saved to {PASSWORD_FILE} and copied to clipboard.")
         sys.exit(0)
-
 
 clipboard_content = get_from_clipboard()
 password = password_logic()
