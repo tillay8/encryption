@@ -1,5 +1,6 @@
 import sys, subprocess, secrets, io, os, base64, random, string, binascii
-from PIL import Image, UnidentifiedImageError
+from tkinter import Tk, Label
+from PIL import Image, UnidentifiedImageError, ImageTk
 from hashlib import sha256
 try:
     from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
@@ -10,6 +11,7 @@ try:
     from Crypto.Util.Padding import pad, unpad
 except ModuleNotFoundError:
     print("please install the python-pycryptodome package")
+    sys.exit(1)
 # Constants
 PASSWORD_FILE = "/tmp/key"
 prefix_text, prefix_password, prefix_image = "$$", "@@", "££"
@@ -64,7 +66,17 @@ def decrypt_image(encrypted_data, key):
     cipher = Cipher(algorithms.AES(key), modes.CFB8(iv), backend=default_backend())
     decrypted_data = cipher.decryptor().update(encrypted_img) + cipher.decryptor().finalize()
     return Image.open(io.BytesIO(decrypted_data))
-
+def display_image():
+    if len(sys.argv) > 1 and sys.argv[1] == "-i":
+        try:
+            root = Tk()
+            root.title("Image")
+            tk_image = ImageTk.PhotoImage(decrypted_image)
+            label = Label(root, image=tk_image)
+            label.pack()
+            root.mainloop()
+        except ImportError:
+            print("To display the image, please install the pk package!")
 # Main logic
 if len(sys.argv) > 1:
     if sys.argv[1] == "-n":
@@ -74,16 +86,16 @@ if len(sys.argv) > 1:
         print(f"New password saved to {PASSWORD_FILE} and copied to clipboard.")
         sys.exit(0)
     elif sys.argv[1] == "-p":
-        password = "@@"+''.join(random.choices(string.ascii_letters + string.digits + string.punctuation, k=30))
+        password = prefix_password+''.join(random.choices(string.ascii_letters + string.digits + string.punctuation, k=30))
         copy_to_clipboard(password)
         with open(PASSWORD_FILE, 'w') as f: f.write(password)
         print(f"New random password saved to {PASSWORD_FILE} and copied to clipboard.")
         sys.exit(0)
 
+
 clipboard_content = get_from_clipboard()
 password = password_logic()
 
-#try:
 if clipboard_content.startswith(prefix_text.encode()):
     text = decrypt(clipboard_content[len(prefix_text):].decode(), password) or "Incorrect password."
     print("Decrypted text:", text)
@@ -94,7 +106,8 @@ elif clipboard_content.startswith(prefix_image.encode()):
         img_bytes = io.BytesIO()
         decrypted_image.save(img_bytes, format="PNG")
         copy_to_clipboard(img_bytes.getvalue())
-        print("Image decrypted from copied text and copied.\nIt is better practice to click the download button on the text block in the future.")
+        print("Image decrypted from text and copied.")
+        display_image()
     except (OSError, binascii.Error):
         print("Please click the download button on the text block")
         copy_to_clipboard("")
@@ -107,6 +120,7 @@ elif os.path.exists(message_file_path):
         decrypted_image.save(img_bytes, format="PNG")
         copy_to_clipboard(img_bytes.getvalue())
         print("Image decrypted from file and copied.")
+        display_image()
     os.remove(message_file_path)
 else:
     try:
@@ -118,5 +132,3 @@ else:
         text = encrypt(input("Text Input: "), password)
         copy_to_clipboard(prefix_text + text)
         print("Encrypted text copied to clipboard.")
-#except Exception as e:
-#    print("what are you trying to feed me im frightened")
