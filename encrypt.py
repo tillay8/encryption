@@ -15,16 +15,15 @@ except ModuleNotFoundError:
 PASSWORD_FILE = "/tmp/key"
 prefix_text, prefix_password, prefix_image = "$$", "@@", "££"
 
-# Utilities
+# Clipboard stuff
 def copy_to_clipboard(data):  # Copies to clipboard for Wayland or X11
     cmd = ["wl-copy"] if os.environ.get("XDG_SESSION_TYPE") == "wayland" else ["xclip", "-selection", "clipboard"]
     subprocess.run(cmd, input=data if isinstance(data, bytes) else data.encode())
 
-def get_from_clipboard():  # Reads clipboard data (text or binary)
+def get_from_clipboard():  # Reads clipboard content (text or binary)
     cmd = ["wl-paste", "--no-newline"] if os.environ.get("XDG_SESSION_TYPE") == "wayland" else ["xclip", "-o", "-selection", "clipboard"]
-    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    data, _ = process.communicate()
-    return data  # Return raw binary data
+    data = subprocess.run(cmd, stdout=subprocess.PIPE).stdout
+    return data  # Return raw binary data (no decode)
 
 # Password management
 def password_logic():
@@ -56,13 +55,7 @@ def decrypt(ciphertext, passphrase):
 # Image encryption and decryption
 def derive_key(password):
     salt = password.encode()
-    kdf = PBKDF2HMAC(
-        algorithm=hashes.SHA256(),  # Use an instance of SHA256
-        length=32,
-        salt=salt,
-        iterations=100000,
-        backend=default_backend(),
-    )
+    kdf = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=salt, iterations=100000, backend=default_backend())
     return kdf.derive(password.encode())
 
 def encrypt_image(image: Image.Image, key: bytes):
@@ -78,7 +71,7 @@ def decrypt_image(encrypted_data: bytes, key: bytes):
     cipher = Cipher(algorithms.AES(key), modes.CFB8(iv), backend=default_backend())
     decrypted_data = cipher.decryptor().update(encrypted_img) + cipher.decryptor().finalize()
     return Image.open(io.BytesIO(decrypted_data))
-
+# Main logic
 # Handle flags
 if len(sys.argv) > 1:
     if sys.argv[1] == "-n":
@@ -97,32 +90,38 @@ if len(sys.argv) > 1:
             f.write(password)
         print(f"New random password saved to {PASSWORD_FILE} and copied to clipboard.")
         sys.exit(0)
-
-# Main logic
 clipboard_content = get_from_clipboard()
 password = password_logic()
 
+# Handle figuring out what is to be copied or pasted
 try:
-    if clipboard_content.startswith(prefix_text.encode()):  # Handle text decryption
+    if clipboard_content.startswith(prefix_text.encode()):  # Handle text encryption/decryption
         text = decrypt(clipboard_content[2:].decode(), password) or "Incorrect password."
         print("Decrypted text:", text)
         copy_to_clipboard("")  # Clear clipboard
-    elif clipboard_content.startswith(prefix_password.encode()):  # Handle password pasting
-        password_logic()
+    elif clipboard_content.startswith(prefix_password.encode()):  # Save new password
+        with open(PASSWORD_FILE, 'w') as f:
+            f.write(clipboard_content[2:].decode())
+        print(f"New password saved to {PASSWORD_FILE}.")
+        sys.exit(0)
     elif clipboard_content.startswith(prefix_image.encode()):  # Handle image decryption
-        decrypted_image = decrypt_image(clipboard_content[len(prefix_image):], derive_key(password))
-        img_bytes = io.BytesIO(); decrypted_image.save(img_bytes, format="PNG")
-        copy_to_clipboard(img_bytes.getvalue())
-        print("Image decrypted and copied")
-    else:  # Handle encryption
         try:
-            image = Image.open(io.BytesIO(clipboard_content))
+            decrypted_image = decrypt_image(clipboard_content[len(prefix_image):], derive_key(password))
+            img_bytes = io.BytesIO()
+            decrypted_image.save(img_bytes, format="PNG")
+            copy_to_clipboard(img_bytes.getvalue())
+            print("Image decrypted and copied.")
+        except Exception as e:
+            print(f"Error decrypting image: {e}")
+    else:  # If the content is not text or image, attempt to encrypt it
+        try:
+            image = Image.open(io.BytesIO(clipboard_content))  # Attempt to open as image
             encrypted_image = encrypt_image(image, derive_key(password))
             copy_to_clipboard(prefix_image.encode() + encrypted_image)
-            print("Image encrypted and copied")
-        except (UnidentifiedImageError, ValueError):
+            print("Image encrypted and copied.")
+        except UnidentifiedImageError:  # Handle text encryption if not an image
             text = encrypt(input("Text Input: "), password)
             copy_to_clipboard(prefix_text + text)
             print("Encrypted text copied to clipboard.")
-except Exception as e:
+except Exception:
     print("what are you feeding me im frightned")
