@@ -98,8 +98,7 @@ password = password_logic()
 
 if prefix_text.encode() in clipboard_content:
     content = clipboard_content.decode()
-    content = re.sub(r"@[^&]*&&|@.*$", "", content).replace(" ", "")
-    content = re.sub(r"<.*?>", "", content)
+    content = re.sub(r"@[^&]*&&|@.*$|<.*?>", "", content).replace(" ", "")
     text = decrypt(content, password) or "Incorrect password."
     print("Decrypted text:", text)
     copy_to_clipboard("")
