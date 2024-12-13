@@ -15,7 +15,11 @@ if it starts with `&&` it parses it as encrypted text
 
 if it starts with `@@` it makes it the new password
 
-if it starts with neither, it prompts the user for text to encrypt
+if it starts with `££` it parses it as an encrypted image
+
+if it is an image, it encryptes the image
+
+if it starts with none of these, it prompts the user for text to encrypt
 
 flags: 
 
@@ -26,3 +30,7 @@ flags:
 support is only for linux with x11 or wayland
 
 for sharing passwords between people securely just use pgp keys
+
+decryptpgp.sh can take a PGP message on your clipboard and attempt to decrypt it if someone sends you a key
+
+use a graphical asymetric encryption tool like kleopatra for more complicated encryption work
