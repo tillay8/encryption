@@ -1,4 +1,4 @@
-import sys, subprocess, secrets, io, os, base64, random, string
+import sys, subprocess, secrets, io, os, base64, random, string, binascii
 from PIL import Image, UnidentifiedImageError
 from hashlib import sha256
 try:
@@ -83,40 +83,40 @@ if len(sys.argv) > 1:
 clipboard_content = get_from_clipboard()
 password = password_logic()
 
-try:
-    if clipboard_content.startswith(prefix_text.encode()):
-        text = decrypt(clipboard_content[len(prefix_text):].decode(), password) or "Incorrect password."
-        print("Decrypted text:", text)
+#try:
+if clipboard_content.startswith(prefix_text.encode()):
+    text = decrypt(clipboard_content[len(prefix_text):].decode(), password) or "Incorrect password."
+    print("Decrypted text:", text)
+    copy_to_clipboard("")
+elif clipboard_content.startswith(prefix_image.encode()):
+    try:
+        decrypted_image = decrypt_image(clipboard_content[len(prefix_image):], derive_key(password))
+        img_bytes = io.BytesIO()
+        decrypted_image.save(img_bytes, format="PNG")
+        copy_to_clipboard(img_bytes.getvalue())
+        print("Image decrypted from copied text and copied.\nIt is better practice to click the download button on the text block in the future.")
+    except (OSError, binascii.Error):
+        print("Please click the download button on the text block")
         copy_to_clipboard("")
-    elif clipboard_content.startswith(prefix_image.encode()):
-        try:
-            decrypted_image = decrypt_image(clipboard_content[len(prefix_image):], derive_key(password))
-            img_bytes = io.BytesIO()
-            decrypted_image.save(img_bytes, format="PNG")
-            copy_to_clipboard(img_bytes.getvalue())
-            print("Image decrypted from copied text and copied.\nIt is better practice to click the download button on the text block in the future.")
-        except OSError:
-            print("Please click the download button on the text block")
-            copy_to_clipboard("")
-    elif os.path.exists(message_file_path):
-        with open(message_file_path, 'rb') as f:
-            clipboard_content = f.read()
-        if clipboard_content.startswith(prefix_image.encode()):
-            decrypted_image = decrypt_image(clipboard_content[len(prefix_image):], derive_key(password))
-            img_bytes = io.BytesIO()
-            decrypted_image.save(img_bytes, format="PNG")
-            copy_to_clipboard(img_bytes.getvalue())
-            print("Image decrypted from file and copied.")
-        os.remove(message_file_path)
-    else:
-        try:
-            image = Image.open(io.BytesIO(clipboard_content))
-            encrypted_image = encrypt_image(image, derive_key(password))
-            copy_to_clipboard(prefix_image.encode() + encrypted_image)
-            print("Image encrypted and copied.")
-        except (UnidentifiedImageError, ValueError):
-            text = encrypt(input("Text Input: "), password)
-            copy_to_clipboard(prefix_text + text)
-            print("Encrypted text copied to clipboard.")
-except Exception as e:
-    print("what are you trying to feed me im frightened")
+elif os.path.exists(message_file_path):
+    with open(message_file_path, 'rb') as f:
+        clipboard_content = f.read()
+    if clipboard_content.startswith(prefix_image.encode()):
+        decrypted_image = decrypt_image(clipboard_content[len(prefix_image):], derive_key(password))
+        img_bytes = io.BytesIO()
+        decrypted_image.save(img_bytes, format="PNG")
+        copy_to_clipboard(img_bytes.getvalue())
+        print("Image decrypted from file and copied.")
+    os.remove(message_file_path)
+else:
+    try:
+        image = Image.open(io.BytesIO(clipboard_content))
+        encrypted_image = encrypt_image(image, derive_key(password))
+        copy_to_clipboard(prefix_image.encode() + encrypted_image)
+        print("Image encrypted and copied.")
+    except (UnidentifiedImageError, ValueError):
+        text = encrypt(input("Text Input: "), password)
+        copy_to_clipboard(prefix_text + text)
+        print("Encrypted text copied to clipboard.")
+#except Exception as e:
+#    print("what are you trying to feed me im frightened")
