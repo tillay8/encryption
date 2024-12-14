@@ -5,37 +5,39 @@ required dependencies:
 
 `xclip, wl-clipboard, python-pyrcyptodome, tk`
 
-default location for stored password is /tmp/key, which is wiped on reboot because its in ram
+# Usage 
 
-can be changed my modifying the source code for encrypt.py
+The default location for stored password is /tmp/key, which is wiped on reboot because its in ram.
 
-the python script automatically checks for whats on your clipboard
+This can be changed my modifying the source code for encrypt.py
 
-if it starts with `&&` it parses it as encrypted text
+The python script automatically checks for whats on your clipboard:
 
-if it starts with `@@` it makes it the new password
+- if it starts with `&&` it parses it as encrypted text
 
-if it starts with `££` it parses it as an encrypted image
+- if it starts with `@@` it makes it the new password
 
-if it is an png image, it encryptes the image (Other image types probably coming soonish maybe)
+- if it starts with `££` it parses it as an encrypted image
 
-if it starts with none of these, it prompts the user for text to encrypt
+- if it is an png image, it encryptes the image (Other image types probably coming soonish maybe)
 
-# Flags 
+- if it starts with none of these, it prompts the user for text to encrypt
 
-`-p`: create new password, overwrite current saved password with it, and copy the new one to the clipboard
+Flags:
 
-`-n`: manually type in a new password
+- `-p`: create new password, overwrite current saved password with it, and copy the new one to the clipboard
 
-`-i`: automatically opens a window with decrypted image for viewing
+- `-n`: manually type in a new password
 
-add the following line to your hyprland config to make the preview floating:
+- `-i`: automatically opens a window with decrypted image for viewing
+
+add the following line to your hyprland config to make the preview image floating:
 
 `windowrule=float,title:^(Image)(.*)$`
 
-support is only for linux with x11 or wayland
+support is only for Linux with X11 or Wayland (Windows is annoyying to code for)
 
-for sharing passwords between people securely just use pgp keys
+For sharing passwords between people securely just use pgp keys.
 
 decryptpgp.sh can take a PGP message on your clipboard and attempt to decrypt it if someone sends you a key
 
