@@ -32,7 +32,10 @@ def password_logic():
         print(f"New password saved to {PASSWORD_FILE}.")
         sys.exit(0)
     if os.path.exists(PASSWORD_FILE): return open(PASSWORD_FILE).read()
-    pw = input("Password to store until next reboot: ")
+    try:
+        pw = input("Password to store until next reboot: ")
+    except KeyboardInterrupt:
+        sys.exit(0)
     with open(PASSWORD_FILE, 'w') as f: f.write(pw)
     return pw
 
@@ -137,6 +140,9 @@ else:
         copy_to_clipboard(prefix_image.encode() + encrypted_image)
         print("Image encrypted and copied.")
     except (UnidentifiedImageError, ValueError):
-        text = encrypt(input("Text Input: "), password)
+        try:
+            text = encrypt(input("Text Input: "), password)
+        except KeyboardInterrupt:
+            sys.exit(0)
         copy_to_clipboard(prefix_text + text)
         print("Encrypted text copied to clipboard.")
