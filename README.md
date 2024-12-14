@@ -3,7 +3,7 @@ Source code for all of the end to end encryption projects I have been doing with
 
 required dependencies:
 
-`xclip, wl-clipboard, python-pyrcyptodome, tk`
+`xclip, wl-clipboard, python-pyrcyptodome, tk, python-pillow`
 
 # Usage 
 
