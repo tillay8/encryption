@@ -25,7 +25,7 @@ The python script automatically checks for whats on your clipboard:
 
 Flags:
 
-- `-p`: create new password, overwrite current saved password with it, and copy the new one to the clipboard
+- `-p`: create new password, overwrite current saved password with it, and copy the new one to the clipboard. Add a number with the length of the password after
 
 - `-n`: manually type in a new password
 
@@ -46,6 +46,8 @@ use a graphical asymetric encryption tool like kleopatra for more complicated en
 
 
 # Testing protocol:
+
+For encrypt.py:
 
 See what happens when you run the script with:
 
