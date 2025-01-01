@@ -56,7 +56,8 @@ func main() {
 ./pgpcli import            imports a key from clipboard
 ./pgpcli export <filepath> exports key to a file
 ./pgpcli encrypt           encrypt a message
-./pgpcli decrypt           decrypts a message from clipboard`)
+./pgpcli decrypt           decrypts a message from clipboard
+./pgpcli help              prints this message`)
         log.Fatal()
     }
 }
