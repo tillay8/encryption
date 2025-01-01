@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"pgpcli/internal/createkey"
@@ -11,6 +12,14 @@ import (
 )
 
 func main() {
+    if len(os.Args) < 2 {
+        fmt.Println(`./pgpcli create            creates a key
+./pgpcli import            imports a key from clipboard
+./pgpcli export <filepath> exports key to a file
+./pgpcli encrypt           encrypt a message
+./pgpcli decrypt           decrypts a message from clipboard`)
+        log.Fatal("No argument provided")
+    }
     action := os.Args[1]
 
     switch action {
