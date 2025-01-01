@@ -9,15 +9,12 @@ import (
 	"pgpcli/internal/encrypt"
 	"pgpcli/internal/export"
 	"pgpcli/internal/importkey"
+	"pgpcli/internal/listkeys"
 )
 
 func main() {
     if len(os.Args) < 2 {
-        fmt.Println(`./pgpcli create            creates a key
-./pgpcli import            imports a key from clipboard
-./pgpcli export <filepath> exports key to a file
-./pgpcli encrypt           encrypt a message
-./pgpcli decrypt           decrypts a message from clipboard`)
+        helpMessage()
         log.Fatal("No argument provided")
     }
     action := os.Args[1]
@@ -51,13 +48,23 @@ func main() {
         if err != nil {
             log.Fatal(err)
         }
+    case "list-keys":
+        err := listkeys.ListKeys()
+        if err != nil {
+            log.Fatal(err)
+        }
     default:
+        helpMessage()
+        log.Fatal()
+    }
+}
+
+func helpMessage() {
         fmt.Println(`./pgpcli create            creates a key
 ./pgpcli import            imports a key from clipboard
 ./pgpcli export <filepath> exports key to a file
 ./pgpcli encrypt           encrypt a message
 ./pgpcli decrypt           decrypts a message from clipboard
+./pgpcli list-keys         lists all available pubkeys
 ./pgpcli help              prints this message`)
-        log.Fatal()
-    }
 }
