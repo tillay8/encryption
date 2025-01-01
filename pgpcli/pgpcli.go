@@ -51,5 +51,12 @@ func main() {
         if err != nil {
             log.Fatal(err)
         }
+    case "help":
+        fmt.Println(`./pgpcli create            creates a key
+./pgpcli import            imports a key from clipboard
+./pgpcli export <filepath> exports key to a file
+./pgpcli encrypt           encrypt a message
+./pgpcli decrypt           decrypts a message from clipboard`)
+        log.Fatal()
     }
 }
