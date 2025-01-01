@@ -44,7 +44,7 @@ func main() {
             log.Fatal(err)
         }
     case "export":
-        if os.Args[2] == "" {
+        if len(os.Args) < 3 {
             log.Fatal("Put in a filepath silly!")
         }
         err := export.Export(os.Args[2])
