@@ -62,7 +62,7 @@ func main() {
 func helpMessage() {
         fmt.Println(`./pgpcli create            creates a key
 ./pgpcli import            imports a key from clipboard
-./pgpcli export <filepath> exports key to a file
+./pgpcli export <filename> exports key to a file
 ./pgpcli encrypt           encrypt a message
 ./pgpcli decrypt           decrypts a message from clipboard
 ./pgpcli list-keys         lists all available pubkeys
