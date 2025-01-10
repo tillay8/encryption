@@ -26,6 +26,7 @@ func ImportKey() error {
         }
         user = trimToFirstWord(v.Name)
     }
+    fmt.Println("User: " + user)
 
     homeDir, err := os.UserHomeDir()
     if err != nil {
